@@ -19,8 +19,8 @@
 
 **Purpose**: Create `SqlTypeError` enum and module structure — blocks all user stories.
 
-- [ ] T001 [P] Create `src/error.rs` — define `SqlTypeError` enum with variants: `NullValue`, `Overflow`, `DivideByZero`, `ParseError(String)`, `OutOfRange(String)`. Implement `Display`, `Debug`, `Clone`, `PartialEq`, `std::error::Error`. Add unit tests for Display output of each variant.
-- [ ] T002 Update `src/lib.rs` — remove placeholder `add` function, declare modules (`mod error; mod sql_boolean;`), re-export `pub use error::SqlTypeError;` and `pub use sql_boolean::SqlBoolean;`.
+- [x] T001 [P] Create `src/error.rs` — define `SqlTypeError` enum with variants: `NullValue`, `Overflow`, `DivideByZero`, `ParseError(String)`, `OutOfRange(String)`. Implement `Display`, `Debug`, `Clone`, `PartialEq`, `std::error::Error`. Add unit tests for Display output of each variant.
+- [x] T002 Update `src/lib.rs` — remove placeholder `add` function, declare modules (`mod error; mod sql_boolean;`), re-export `pub use error::SqlTypeError;` and `pub use sql_boolean::SqlBoolean;`.
 
 **Checkpoint**: `cargo check` passes with empty `sql_boolean.rs` stub.
 
