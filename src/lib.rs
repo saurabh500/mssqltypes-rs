@@ -1,7 +1,9 @@
 pub mod error;
 pub mod sql_boolean;
 pub mod sql_byte;
+pub mod sql_int16;
 
 pub use error::SqlTypeError;
 pub use sql_boolean::SqlBoolean;
 pub use sql_byte::SqlByte;
+pub use sql_int16::SqlInt16;

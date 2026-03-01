@@ -22,6 +22,7 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 Rust (Edition 2024, latest stable): Follow standard conventions
 
 ## Recent Changes
+- 003-sql-int16: Added Rust (Edition 2024, latest stable) + None (std only)
 
 - 002-sql-byte: Added Rust (Edition 2024, latest stable) + None (std only)
 
