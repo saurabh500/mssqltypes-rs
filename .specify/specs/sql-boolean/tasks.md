@@ -36,7 +36,7 @@
 
 > **Write these tests FIRST. They MUST FAIL before implementation.**
 
-- [ ] T003 [US1] Write tests in `src/sql_boolean.rs` `#[cfg(test)] mod tests` for constants and construction:
+- [x] T003 [US1] Write tests in `src/sql_boolean.rs` `#[cfg(test)] mod tests` for constants and construction:
   - `test_true_constant_is_true` — `SqlBoolean::TRUE.is_true()` returns `true`
   - `test_false_constant_is_false` — `SqlBoolean::FALSE.is_false()` returns `true`
   - `test_null_constant_is_null` — `SqlBoolean::NULL.is_null()` returns `true`
@@ -49,7 +49,7 @@
   - `test_from_int_negative` — `SqlBoolean::from_int(-1).is_true()` returns `true`
   - `test_from_bool_trait` — `SqlBoolean::from(true).is_true()` returns `true`
 
-- [ ] T004 [US1] Write tests for value access:
+- [x] T004 [US1] Write tests for value access:
   - `test_value_true` — `SqlBoolean::TRUE.value()` returns `Ok(true)`
   - `test_value_false` — `SqlBoolean::FALSE.value()` returns `Ok(false)`
   - `test_value_null_returns_error` — `SqlBoolean::NULL.value()` returns `Err(SqlTypeError::NullValue)`
@@ -57,29 +57,29 @@
   - `test_byte_value_false` — `SqlBoolean::FALSE.byte_value()` returns `Ok(0)`
   - `test_byte_value_null_returns_error` — `SqlBoolean::NULL.byte_value()` returns `Err(SqlTypeError::NullValue)`
 
-- [ ] T005 [US1] Write tests for Copy/Clone/Debug:
+- [x] T005 [US1] Write tests for Copy/Clone/Debug:
   - `test_copy_semantics` — assigning `SqlBoolean` to another variable copies it
   - `test_debug_format` — `format!("{:?}", SqlBoolean::TRUE)` produces meaningful output
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implement `SqlBoolean` struct and constants in `src/sql_boolean.rs`:
+- [x] T006 [US1] Implement `SqlBoolean` struct and constants in `src/sql_boolean.rs`:
   - Define `pub struct SqlBoolean { m_value: u8 }` with `Copy`, `Clone`, `Debug` derives
   - Internal constants: `X_NULL: u8 = 0`, `X_FALSE: u8 = 1`, `X_TRUE: u8 = 2`
   - Public constants: `NULL`, `TRUE`, `FALSE`, `ZERO`, `ONE`
 
-- [ ] T007 [US1] Implement constructors and inspectors in `src/sql_boolean.rs`:
+- [x] T007 [US1] Implement constructors and inspectors in `src/sql_boolean.rs`:
   - `pub fn new(value: bool) -> Self`
   - `pub fn from_int(value: i32) -> Self`
   - `pub fn is_null(&self) -> bool`
   - `pub fn is_true(&self) -> bool`
   - `pub fn is_false(&self) -> bool`
 
-- [ ] T008 [US1] Implement value access in `src/sql_boolean.rs`:
+- [x] T008 [US1] Implement value access in `src/sql_boolean.rs`:
   - `pub fn value(&self) -> Result<bool, SqlTypeError>`
   - `pub fn byte_value(&self) -> Result<u8, SqlTypeError>`
 
-- [ ] T009 [US1] Implement `From<bool> for SqlBoolean` in `src/sql_boolean.rs`.
+- [x] T009 [US1] Implement `From<bool> for SqlBoolean` in `src/sql_boolean.rs`.
 
 **Checkpoint**: `cargo test` — all US1 tests pass. `SqlBoolean` can be constructed, inspected, and values extracted.
 
