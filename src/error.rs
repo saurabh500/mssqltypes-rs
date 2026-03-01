@@ -18,7 +18,10 @@ pub enum SqlTypeError {
 impl fmt::Display for SqlTypeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            SqlTypeError::NullValue => write!(f, "Data is Null. This method or property cannot be called on Null values."),
+            SqlTypeError::NullValue => write!(
+                f,
+                "Data is Null. This method or property cannot be called on Null values."
+            ),
             SqlTypeError::Overflow => write!(f, "Arithmetic overflow error."),
             SqlTypeError::DivideByZero => write!(f, "Divide by zero error."),
             SqlTypeError::ParseError(msg) => write!(f, "Failed to parse: {msg}"),

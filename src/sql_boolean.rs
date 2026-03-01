@@ -610,12 +610,20 @@ mod tests {
 
     #[test]
     fn test_sql_not_equals_true_false() {
-        assert!(SqlBoolean::TRUE.sql_not_equals(&SqlBoolean::FALSE).is_true());
+        assert!(
+            SqlBoolean::TRUE
+                .sql_not_equals(&SqlBoolean::FALSE)
+                .is_true()
+        );
     }
 
     #[test]
     fn test_sql_not_equals_true_true() {
-        assert!(SqlBoolean::TRUE.sql_not_equals(&SqlBoolean::TRUE).is_false());
+        assert!(
+            SqlBoolean::TRUE
+                .sql_not_equals(&SqlBoolean::TRUE)
+                .is_false()
+        );
     }
 
     #[test]
@@ -625,46 +633,60 @@ mod tests {
 
     #[test]
     fn test_sql_less_than_true_false() {
-        assert!(SqlBoolean::TRUE.sql_less_than(&SqlBoolean::FALSE).is_false());
+        assert!(
+            SqlBoolean::TRUE
+                .sql_less_than(&SqlBoolean::FALSE)
+                .is_false()
+        );
     }
 
     #[test]
     fn test_sql_greater_than_true_false() {
-        assert!(SqlBoolean::TRUE.sql_greater_than(&SqlBoolean::FALSE).is_true());
+        assert!(
+            SqlBoolean::TRUE
+                .sql_greater_than(&SqlBoolean::FALSE)
+                .is_true()
+        );
     }
 
     #[test]
     fn test_sql_less_than_or_equal_true_true() {
-        assert!(SqlBoolean::TRUE
-            .sql_less_than_or_equal(&SqlBoolean::TRUE)
-            .is_true());
+        assert!(
+            SqlBoolean::TRUE
+                .sql_less_than_or_equal(&SqlBoolean::TRUE)
+                .is_true()
+        );
     }
 
     #[test]
     fn test_sql_greater_than_or_equal_false_false() {
-        assert!(SqlBoolean::FALSE
-            .sql_greater_than_or_equal(&SqlBoolean::FALSE)
-            .is_true());
+        assert!(
+            SqlBoolean::FALSE
+                .sql_greater_than_or_equal(&SqlBoolean::FALSE)
+                .is_true()
+        );
     }
 
     #[test]
     fn test_sql_comparison_with_null() {
         assert!(SqlBoolean::NULL.sql_equals(&SqlBoolean::TRUE).is_null());
-        assert!(SqlBoolean::NULL
-            .sql_not_equals(&SqlBoolean::TRUE)
-            .is_null());
-        assert!(SqlBoolean::NULL
-            .sql_less_than(&SqlBoolean::TRUE)
-            .is_null());
-        assert!(SqlBoolean::NULL
-            .sql_greater_than(&SqlBoolean::TRUE)
-            .is_null());
-        assert!(SqlBoolean::NULL
-            .sql_less_than_or_equal(&SqlBoolean::TRUE)
-            .is_null());
-        assert!(SqlBoolean::NULL
-            .sql_greater_than_or_equal(&SqlBoolean::TRUE)
-            .is_null());
+        assert!(SqlBoolean::NULL.sql_not_equals(&SqlBoolean::TRUE).is_null());
+        assert!(SqlBoolean::NULL.sql_less_than(&SqlBoolean::TRUE).is_null());
+        assert!(
+            SqlBoolean::NULL
+                .sql_greater_than(&SqlBoolean::TRUE)
+                .is_null()
+        );
+        assert!(
+            SqlBoolean::NULL
+                .sql_less_than_or_equal(&SqlBoolean::TRUE)
+                .is_null()
+        );
+        assert!(
+            SqlBoolean::NULL
+                .sql_greater_than_or_equal(&SqlBoolean::TRUE)
+                .is_null()
+        );
     }
 
     // ── T019: PartialEq, Eq, Hash, Ord tests ────────────────────────────
