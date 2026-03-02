@@ -23,9 +23,9 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 Rust (Edition 2024, latest stable): Follow standard conventions
 
 ## Recent Changes
+- 012-sql-binary: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 - 009-sql-double: Added Rust (Edition 2024, latest stable) + None (std only)
 - 010-sql-datetime: Added Rust (Edition 2024, latest stable) + None (std only)
-- 007-sql-money: Added Rust (Edition 2024, latest stable) + None (std only)
 
 
 <!-- MANUAL ADDITIONS START -->
