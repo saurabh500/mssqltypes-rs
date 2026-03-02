@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlSingle module ──────────────────────────────────────────────────
 
 //! `SqlSingle` — a nullable 32-bit IEEE 754 floating-point type with SQL NULL

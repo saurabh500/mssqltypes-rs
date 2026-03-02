@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlDecimal module ────────────────────────────────────────────────────
 
 //! `SqlDecimal` — a fixed-point decimal number with SQL NULL support, equivalent to

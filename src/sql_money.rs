@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlMoney module ──────────────────────────────────────────────────────
 
 //! `SqlMoney` — a fixed-point currency type with 4 decimal places and SQL NULL

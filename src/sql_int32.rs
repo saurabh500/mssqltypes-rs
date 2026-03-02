@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlInt32 module ─────────────────────────────────────────────────────
 
 //! `SqlInt32` — a signed 32-bit integer with SQL NULL support, equivalent to
