@@ -25,6 +25,7 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 Rust (Edition 2024, latest stable): Follow standard conventions
 
 ## Recent Changes
+- 012-sql-binary: Added Rust (Edition 2024, latest stable) + None (std only)
 - 013-sql-string: Added Rust (Edition 2024, latest stable) + None (std only)
 - 008-sql-single: Added Rust (Edition 2024, latest stable) + None (std only)
 - 009-sql-double: Added Rust (Edition 2024, latest stable) + None (std only)

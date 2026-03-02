@@ -1,4 +1,5 @@
 pub mod error;
+pub mod sql_binary;
 pub mod sql_boolean;
 pub mod sql_byte;
 pub mod sql_compare_options;
@@ -13,6 +14,7 @@ pub mod sql_single;
 pub mod sql_string;
 
 pub use error::SqlTypeError;
+pub use sql_binary::SqlBinary;
 pub use sql_boolean::SqlBoolean;
 pub use sql_byte::SqlByte;
 pub use sql_compare_options::SqlCompareOptions;
