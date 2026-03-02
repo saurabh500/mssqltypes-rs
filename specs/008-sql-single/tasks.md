@@ -19,8 +19,8 @@
 
 **Purpose**: Create module file and register in lib.rs
 
-- [ ] T001 Create `src/sql_single.rs` with module skeleton (struct, imports, test module)
-- [ ] T002 Register module in `src/lib.rs`: add `pub mod sql_single` and `pub use sql_single::SqlSingle`
+- [X] T001 Create `src/sql_single.rs` with module skeleton (struct, imports, test module)
+- [X] T002 Register module in `src/lib.rs`: add `pub mod sql_single` and `pub use sql_single::SqlSingle`
 
 **Checkpoint**: Project compiles with empty SqlSingle struct
 
@@ -32,10 +32,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Define `SqlSingle` struct with `Option<f32>` field, derive `Copy, Clone, Debug` in `src/sql_single.rs`
-- [ ] T004 Implement constants `NULL`, `ZERO`, `MIN_VALUE`, `MAX_VALUE` in `src/sql_single.rs`
-- [ ] T005 Implement `new(f32) -> Result<SqlSingle, SqlTypeError>` with `is_finite()` validation in `src/sql_single.rs`
-- [ ] T006 Implement `From<f32>` (panicking on NaN/Infinity) in `src/sql_single.rs`
+- [X] T003 Define `SqlSingle` struct with `Option<f32>` field, derive `Copy, Clone, Debug` in `src/sql_single.rs`
+- [X] T004 Implement constants `NULL`, `ZERO`, `MIN_VALUE`, `MAX_VALUE` in `src/sql_single.rs`
+- [X] T005 Implement `new(f32) -> Result<SqlSingle, SqlTypeError>` with `is_finite()` validation in `src/sql_single.rs`
+- [X] T006 Implement `From<f32>` (panicking on NaN/Infinity) in `src/sql_single.rs`
 
 **Checkpoint**: Foundation ready — SqlSingle can be constructed and validated
 
@@ -49,15 +49,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Tests for `new()` with valid values (positive, negative, zero) in `src/sql_single.rs`
-- [ ] T008 [P] [US1] Tests for `new()` rejecting NaN, Infinity, NEG_INFINITY in `src/sql_single.rs`
-- [ ] T009 [P] [US1] Tests for `NULL`, `ZERO`, `MIN_VALUE`, `MAX_VALUE` constants in `src/sql_single.rs`
-- [ ] T010 [P] [US1] Tests for `value()` and `is_null()` including NULL error case in `src/sql_single.rs`
+- [X] T007 [P] [US1] Tests for `new()` with valid values (positive, negative, zero) in `src/sql_single.rs`
+- [X] T008 [P] [US1] Tests for `new()` rejecting NaN, Infinity, NEG_INFINITY in `src/sql_single.rs`
+- [X] T009 [P] [US1] Tests for `NULL`, `ZERO`, `MIN_VALUE`, `MAX_VALUE` constants in `src/sql_single.rs`
+- [X] T010 [P] [US1] Tests for `value()` and `is_null()` including NULL error case in `src/sql_single.rs`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement `is_null(&self) -> bool` in `src/sql_single.rs`
-- [ ] T012 [US1] Implement `value(&self) -> Result<f32, SqlTypeError>` in `src/sql_single.rs`
+- [X] T011 [US1] Implement `is_null(&self) -> bool` in `src/sql_single.rs`
+- [X] T012 [US1] Implement `value(&self) -> Result<f32, SqlTypeError>` in `src/sql_single.rs`
 
 **Checkpoint**: SqlSingle can be created, inspected, and rejects invalid inputs — all US1 acceptance scenarios pass
 
@@ -71,17 +71,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T013 [P] [US2] Tests for `checked_add` (normal, overflow, NULL) in `src/sql_single.rs`
-- [ ] T014 [P] [US2] Tests for `checked_sub` (normal, overflow, NULL) in `src/sql_single.rs`
-- [ ] T015 [P] [US2] Tests for `checked_mul` (normal, overflow, NULL) in `src/sql_single.rs`
-- [ ] T016 [P] [US2] Tests for `checked_div` (normal, divide-by-zero, zero/zero, NULL) in `src/sql_single.rs`
+- [X] T013 [P] [US2] Tests for `checked_add` (normal, overflow, NULL) in `src/sql_single.rs`
+- [X] T014 [P] [US2] Tests for `checked_sub` (normal, overflow, NULL) in `src/sql_single.rs`
+- [X] T015 [P] [US2] Tests for `checked_mul` (normal, overflow, NULL) in `src/sql_single.rs`
+- [X] T016 [P] [US2] Tests for `checked_div` (normal, divide-by-zero, zero/zero, NULL) in `src/sql_single.rs`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement `checked_add`, `checked_sub`, `checked_mul` with `is_finite()` post-check in `src/sql_single.rs`
-- [ ] T018 [US2] Implement `checked_div` with divisor==0.0 pre-check and `is_finite()` post-check in `src/sql_single.rs`
-- [ ] T019 [US2] Implement `Add/Sub/Mul/Div` operator traits (4 ref variants each) delegating to checked methods in `src/sql_single.rs`
-- [ ] T020 [US2] Tests for operator trait variants (owned×owned, owned×ref, ref×owned, ref×ref) in `src/sql_single.rs`
+- [X] T017 [US2] Implement `checked_add`, `checked_sub`, `checked_mul` with `is_finite()` post-check in `src/sql_single.rs`
+- [X] T018 [US2] Implement `checked_div` with divisor==0.0 pre-check and `is_finite()` post-check in `src/sql_single.rs`
+- [X] T019 [US2] Implement `Add/Sub/Mul/Div` operator traits (4 ref variants each) delegating to checked methods in `src/sql_single.rs`
+- [X] T020 [US2] Tests for operator trait variants (owned×owned, owned×ref, ref×owned, ref×ref) in `src/sql_single.rs`
 
 **Checkpoint**: All four arithmetic operations work with overflow detection, divide-by-zero, and NULL propagation
 
@@ -95,11 +95,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T021 [P] [US3] Tests for negation (positive, negative, zero, negative zero, NULL) in `src/sql_single.rs`
+- [X] T021 [P] [US3] Tests for negation (positive, negative, zero, negative zero, NULL) in `src/sql_single.rs`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement `Neg` trait (owned + ref variants, infallible, NULL propagates) in `src/sql_single.rs`
+- [X] T022 [US3] Implement `Neg` trait (owned + ref variants, infallible, NULL propagates) in `src/sql_single.rs`
 
 **Checkpoint**: Negation works correctly including IEEE 754 negative zero
 
@@ -113,11 +113,11 @@
 
 ### Tests for User Story 4
 
-- [ ] T023 [P] [US4] Tests for all 6 comparison methods (equal, unequal, less, greater, NULL) in `src/sql_single.rs`
+- [X] T023 [P] [US4] Tests for all 6 comparison methods (equal, unequal, less, greater, NULL) in `src/sql_single.rs`
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Implement `sql_equals`, `sql_not_equals`, `sql_less_than`, `sql_greater_than`, `sql_less_than_or_equal`, `sql_greater_than_or_equal` in `src/sql_single.rs`
+- [X] T024 [US4] Implement `sql_equals`, `sql_not_equals`, `sql_less_than`, `sql_greater_than`, `sql_less_than_or_equal`, `sql_greater_than_or_equal` in `src/sql_single.rs`
 
 **Checkpoint**: All six SQL comparison methods work with three-valued NULL logic
 
@@ -131,13 +131,13 @@
 
 ### Tests for User Story 5
 
-- [ ] T025 [P] [US5] Tests for `Display` (values, NULL, zero) in `src/sql_single.rs`
-- [ ] T026 [P] [US5] Tests for `FromStr` (valid, invalid, "Null", "NaN", "Infinity", overflow) in `src/sql_single.rs`
+- [X] T025 [P] [US5] Tests for `Display` (values, NULL, zero) in `src/sql_single.rs`
+- [X] T026 [P] [US5] Tests for `FromStr` (valid, invalid, "Null", "NaN", "Infinity", overflow) in `src/sql_single.rs`
 
 ### Implementation for User Story 5
 
-- [ ] T027 [US5] Implement `Display` trait (NULL → "Null", value → f32 default) in `src/sql_single.rs`
-- [ ] T028 [US5] Implement `FromStr` trait (case-insensitive "Null", validate is_finite, reject NaN/Infinity) in `src/sql_single.rs`
+- [X] T027 [US5] Implement `Display` trait (NULL → "Null", value → f32 default) in `src/sql_single.rs`
+- [X] T028 [US5] Implement `FromStr` trait (case-insensitive "Null", validate is_finite, reject NaN/Infinity) in `src/sql_single.rs`
 
 **Checkpoint**: Display and FromStr round-trip correctly, invalid inputs rejected
 
@@ -151,22 +151,22 @@
 
 ### Tests for User Story 6
 
-- [ ] T029 [P] [US6] Tests for `from_sql_byte`, `from_sql_int16`, `from_sql_int32`, `from_sql_int64` in `src/sql_single.rs`
-- [ ] T030 [P] [US6] Tests for `from_sql_boolean` (TRUE→1.0, FALSE→0.0, NULL→NULL) in `src/sql_single.rs`
-- [ ] T031 [P] [US6] Tests for `from_sql_money` (via f64 intermediate, NULL) in `src/sql_single.rs`
-- [ ] T032 [P] [US6] Tests for `to_sql_double` (widening lossless, NULL) in `src/sql_single.rs`
-- [ ] T033 [P] [US6] Tests for `from_sql_double` (narrowing, overflow for f64::MAX, NULL) in `src/sql_single.rs`
-- [ ] T034 [P] [US6] Tests for `to_sql_boolean` (zero→FALSE, non-zero→TRUE, NULL→NULL) in `src/sql_single.rs`
+- [X] T029 [P] [US6] Tests for `from_sql_byte`, `from_sql_int16`, `from_sql_int32`, `from_sql_int64` in `src/sql_single.rs`
+- [X] T030 [P] [US6] Tests for `from_sql_boolean` (TRUE→1.0, FALSE→0.0, NULL→NULL) in `src/sql_single.rs`
+- [X] T031 [P] [US6] Tests for `from_sql_money` (via f64 intermediate, NULL) in `src/sql_single.rs`
+- [X] T032 [P] [US6] Tests for `to_sql_double` (widening lossless, NULL) in `src/sql_single.rs`
+- [X] T033 [P] [US6] Tests for `from_sql_double` (narrowing, overflow for f64::MAX, NULL) in `src/sql_single.rs`
+- [X] T034 [P] [US6] Tests for `to_sql_boolean` (zero→FALSE, non-zero→TRUE, NULL→NULL) in `src/sql_single.rs`
 
 ### Implementation for User Story 6
 
-- [ ] T035 [US6] Implement `from_sql_byte`, `from_sql_int16`, `from_sql_int32` (widening via `as f32`) in `src/sql_single.rs`
-- [ ] T036 [US6] Implement `from_sql_int64` (widening, may lose precision) in `src/sql_single.rs`
-- [ ] T037 [US6] Implement `from_sql_boolean` (TRUE→1.0, FALSE→0.0, NULL→NULL) in `src/sql_single.rs`
-- [ ] T038 [US6] Implement `from_sql_money` (via `scaled_value() as f64 / 10_000.0` then `as f32`) in `src/sql_single.rs`
-- [ ] T039 [US6] Implement `to_sql_double` (`f32 as f64` widening, lossless, NULL propagates) in `src/sql_single.rs`
-- [ ] T040 [US6] Implement `from_sql_double` (`f64 as f32` narrowing, validate `is_finite()`, Err(Overflow)) in `src/sql_single.rs`
-- [ ] T041 [US6] Implement `to_sql_boolean` (0.0→FALSE, non-zero→TRUE, NULL→NULL) in `src/sql_single.rs`
+- [X] T035 [US6] Implement `from_sql_byte`, `from_sql_int16`, `from_sql_int32` (widening via `as f32`) in `src/sql_single.rs`
+- [X] T036 [US6] Implement `from_sql_int64` (widening, may lose precision) in `src/sql_single.rs`
+- [X] T037 [US6] Implement `from_sql_boolean` (TRUE→1.0, FALSE→0.0, NULL→NULL) in `src/sql_single.rs`
+- [X] T038 [US6] Implement `from_sql_money` (via `scaled_value() as f64 / 10_000.0` then `as f32`) in `src/sql_single.rs`
+- [X] T039 [US6] Implement `to_sql_double` (`f32 as f64` widening, lossless, NULL propagates) in `src/sql_single.rs`
+- [X] T040 [US6] Implement `from_sql_double` (`f64 as f32` narrowing, validate `is_finite()`, Err(Overflow)) in `src/sql_single.rs`
+- [X] T041 [US6] Implement `to_sql_boolean` (0.0→FALSE, non-zero→TRUE, NULL→NULL) in `src/sql_single.rs`
 
 **Checkpoint**: All conversions work with proper NULL propagation and precision behavior
 
@@ -176,15 +176,15 @@
 
 **Purpose**: Standard traits (Eq/Hash/Ord), formatting, linting, quickstart validation
 
-- [ ] T042 [P] Tests for `PartialEq`/`Eq` (NULL==NULL, value equality, -0.0==0.0) in `src/sql_single.rs`
-- [ ] T043 [P] Tests for `Hash` (consistent with Eq, -0.0 normalization) in `src/sql_single.rs`
-- [ ] T044 [P] Tests for `PartialOrd`/`Ord` (NULL < non-NULL, value ordering) in `src/sql_single.rs`
-- [ ] T045 Implement `PartialEq`/`Eq` (manual, safe because NaN excluded) in `src/sql_single.rs`
-- [ ] T046 Implement `Hash` (f32::to_bits with -0.0→+0.0 normalization) in `src/sql_single.rs`
-- [ ] T047 Implement `PartialOrd`/`Ord` (NULL < non-NULL, then f32 ordering) in `src/sql_single.rs`
-- [ ] T048 Run `cargo fmt` and `cargo clippy -- -D warnings` — fix any issues
-- [ ] T049 Run full test suite `cargo test` — verify zero regressions
-- [ ] T050 Run quickstart.md validation tests — verify all examples work
+- [X] T042 [P] Tests for `PartialEq`/`Eq` (NULL==NULL, value equality, -0.0==0.0) in `src/sql_single.rs`
+- [X] T043 [P] Tests for `Hash` (consistent with Eq, -0.0 normalization) in `src/sql_single.rs`
+- [X] T044 [P] Tests for `PartialOrd`/`Ord` (NULL < non-NULL, value ordering) in `src/sql_single.rs`
+- [X] T045 Implement `PartialEq`/`Eq` (manual, safe because NaN excluded) in `src/sql_single.rs`
+- [X] T046 Implement `Hash` (f32::to_bits with -0.0→+0.0 normalization) in `src/sql_single.rs`
+- [X] T047 Implement `PartialOrd`/`Ord` (NULL < non-NULL, then f32 ordering) in `src/sql_single.rs`
+- [X] T048 Run `cargo fmt` and `cargo clippy -- -D warnings` — fix any issues
+- [X] T049 Run full test suite `cargo test` — verify zero regressions
+- [X] T050 Run quickstart.md validation tests — verify all examples work
 
 ---
 
