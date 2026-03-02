@@ -3,14 +3,6 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      bump:
-        description: "Version bump type"
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
       dry_run:
         description: "Dry run (skip actual publish)"
         required: false
@@ -66,20 +58,6 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Current version: $VERSION"
 
-      # ── Compute bumped version ──────────────────────────────────────
-      - name: Compute next version
-        id: bump
-        run: |
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.current.outputs.version }}"
-          case "${{ inputs.bump }}" in
-            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-            patch) PATCH=$((PATCH + 1)) ;;
-          esac
-          NEXT="${MAJOR}.${MINOR}.${PATCH}"
-          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
-          echo "Next version: $NEXT"
-
       # ── Publish to crates.io ────────────────────────────────────────
       - name: Publish to crates.io
         if: ${{ inputs.dry_run == false }}
@@ -119,30 +97,10 @@ jobs:
               prerelease: false,
             });
 
-      # ── Bump version for next development cycle ─────────────────────
-      - name: Bump version in Cargo.toml
-        if: ${{ inputs.dry_run == false }}
-        run: |
-          NEXT="${{ steps.bump.outputs.version }}"
-          sed -i "0,/^version = .*/s//version = \"$NEXT\"/" Cargo.toml
-          echo "Bumped Cargo.toml to $NEXT"
-
-      - name: Commit and push version bump
-        if: ${{ inputs.dry_run == false }}
-        run: |
-          NEXT="${{ steps.bump.outputs.version }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Cargo.toml
-          git commit -m "chore: bump version to $NEXT [skip ci]"
-          git push origin main
-          echo "Pushed version bump to main"
-
       # ── Summary ─────────────────────────────────────────────────────
       - name: Job summary
         run: |
           CURRENT="${{ steps.current.outputs.version }}"
-          NEXT="${{ steps.bump.outputs.version }}"
           DRY="${{ inputs.dry_run }}"
           echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -151,5 +109,4 @@ jobs:
           else
             echo "✅ **Published** \`mssqltypes@${CURRENT}\` to crates.io" >> "$GITHUB_STEP_SUMMARY"
             echo "🏷️ **Tagged** \`v${CURRENT}\`" >> "$GITHUB_STEP_SUMMARY"
-            echo "⏭️ **Bumped** \`Cargo.toml\` to \`${NEXT}\` on \`main\`" >> "$GITHUB_STEP_SUMMARY"
           fi
