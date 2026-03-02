@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlInt64 module ─────────────────────────────────────────────────────
 
 //! `SqlInt64` — a signed 64-bit integer with SQL NULL support, equivalent to

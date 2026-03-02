@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlInt16 module ─────────────────────────────────────────────────────
 
 //! `SqlInt16` — a signed 16-bit integer with SQL NULL support, equivalent to

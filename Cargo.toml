@@ -2,5 +2,13 @@
 name = "mssqltypes"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
+description = "Faithful Rust equivalents of C# System.Data.SqlTypes with SQL NULL semantics, checked arithmetic, and three-valued logic"
+license = "MIT"
+repository = "https://github.com/saurabh500/mssqltypes-rs"
+readme = "README.md"
+keywords = ["sql-server", "sql-types", "mssql", "database", "tds"]
+categories = ["database", "data-structures"]
+exclude = [".github/", ".specify/", "specs/"]
 
 [dependencies]

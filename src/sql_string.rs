@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 //! `SqlString` — a nullable string type with configurable comparison options.
 //!
 //! Equivalent to C# `System.Data.SqlTypes.SqlString` / SQL Server `NVARCHAR`.

@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
 // ── T001: SqlDouble module ──────────────────────────────────────────────────
 
 //! `SqlDouble` — a nullable 64-bit IEEE 754 floating-point type with SQL NULL
