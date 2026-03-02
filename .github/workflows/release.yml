@@ -32,8 +32,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           # Full history needed to push back to main
+          # Uses RELEASE_TOKEN (a PAT) to bypass branch protection rules
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
