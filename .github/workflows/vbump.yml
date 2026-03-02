@@ -1,0 +1,108 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  vbump:
+    name: Bump Version & Create PR
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.RELEASE_TOKEN }}
+
+      # ── Read current version ────────────────────────────────────────
+      - name: Read current version
+        id: current
+        run: |
+          VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Current version: $VERSION"
+
+      # ── Compute bumped version ──────────────────────────────────────
+      - name: Compute next version
+        id: bump
+        run: |
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${{ steps.current.outputs.version }}"
+          case "${{ inputs.bump }}" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+          NEXT="${MAJOR}.${MINOR}.${PATCH}"
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "Next version: $NEXT"
+
+      # ── Create branch and bump ──────────────────────────────────────
+      - name: Create bump branch
+        run: |
+          NEXT="${{ steps.bump.outputs.version }}"
+          BRANCH="chore/vbump-${NEXT}"
+          echo "branch=$BRANCH" >> "$GITHUB_ENV"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          sed -i "0,/^version = .*/s//version = \"$NEXT\"/" Cargo.toml
+          git add Cargo.toml
+          git commit -m "chore: bump version to $NEXT"
+          git push origin "$BRANCH"
+
+      # ── Create Pull Request ─────────────────────────────────────────
+      - name: Create PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.RELEASE_TOKEN }}
+          script: |
+            const current = '${{ steps.current.outputs.version }}';
+            const next = '${{ steps.bump.outputs.version }}';
+            const branch = process.env.branch;
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore: bump version to ${next}`,
+              head: branch,
+              base: 'main',
+              body: [
+                `## Version Bump`,
+                ``,
+                `Bumps \`Cargo.toml\` version: \`${current}\` → \`${next}\``,
+                ``,
+                `Type: **${{ inputs.bump }}**`,
+                ``,
+                `_Created by the Version Bump workflow._`,
+              ].join('\n'),
+            });
+            core.notice(`PR created: ${pr.html_url}`);
+
+      # ── Summary ─────────────────────────────────────────────────────
+      - name: Job summary
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          NEXT="${{ steps.bump.outputs.version }}"
+          echo "## Version Bump Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| | |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Bump type** | \`${{ inputs.bump }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Previous** | \`${CURRENT}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **New** | \`${NEXT}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Branch** | \`${branch}\` |" >> "$GITHUB_STEP_SUMMARY"
