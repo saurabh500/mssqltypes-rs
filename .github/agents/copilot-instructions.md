@@ -22,9 +22,9 @@ cargo test [ONLY COMMANDS FOR ACTIVE TECHNOLOGIES][ONLY COMMANDS FOR ACTIVE TECH
 Rust (Edition 2024, latest stable): Follow standard conventions
 
 ## Recent Changes
+- 007-sql-money: Added Rust (Edition 2024, latest stable) + None (std only)
 - 006-sql-decimal: Added Rust (Edition 2024, latest stable) + None (std only)
 - 005-sql-int64: Added Rust (Edition 2024, latest stable) + None (std only)
-- 004-sql-int32: Added Rust (Edition 2024, latest stable) + None (std only)
 
 
 <!-- MANUAL ADDITIONS START -->
