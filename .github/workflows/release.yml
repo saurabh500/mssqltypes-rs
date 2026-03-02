@@ -27,6 +27,7 @@ jobs:
   release:
     name: Publish & Tag
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,12 +78,6 @@ jobs:
           NEXT="${MAJOR}.${MINOR}.${PATCH}"
           echo "version=$NEXT" >> "$GITHUB_OUTPUT"
           echo "Next version: $NEXT"
-
-      # ── Stamp release version into Cargo.toml ──────────────────────
-      - name: Set release version in Cargo.toml
-        run: |
-          RELEASE="${{ steps.current.outputs.version }}"
-          echo "Publishing version: $RELEASE"
 
       # ── Publish to crates.io ────────────────────────────────────────
       - name: Publish to crates.io
