@@ -17,9 +17,13 @@
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
 use crate::sql_byte::SqlByte;
+use crate::sql_double::SqlDouble;
 use crate::sql_int16::SqlInt16;
 use crate::sql_int32::SqlInt32;
 use crate::sql_int64::SqlInt64;
+use crate::sql_money::SqlMoney;
+use crate::sql_single::SqlSingle;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -1569,6 +1573,53 @@ impl From<SqlInt64> for SqlDecimal {
     }
 }
 
+impl From<SqlSingle> for SqlDecimal {
+    /// Converts `SqlSingle` to `SqlDecimal`. NULL → NULL.
+    /// # Panics
+    /// Panics if the value is NaN or Infinity (matches C# OverflowException).
+    fn from(v: SqlSingle) -> Self {
+        if v.is_null() {
+            SqlDecimal::NULL
+        } else {
+            let f = v.value().unwrap();
+            // SqlSingle already rejects NaN/Infinity on construction,
+            // but guard defensively
+            assert!(f.is_finite(), "Cannot convert NaN/Infinity to SqlDecimal");
+            let s = format!("{f}");
+            s.parse::<SqlDecimal>()
+                .expect("finite f32 must parse as SqlDecimal")
+        }
+    }
+}
+
+impl From<SqlDouble> for SqlDecimal {
+    /// Converts `SqlDouble` to `SqlDecimal`. NULL → NULL.
+    /// # Panics
+    /// Panics if the value is NaN or Infinity (matches C# OverflowException).
+    fn from(v: SqlDouble) -> Self {
+        if v.is_null() {
+            SqlDecimal::NULL
+        } else {
+            let f = v.value().unwrap();
+            assert!(f.is_finite(), "Cannot convert NaN/Infinity to SqlDecimal");
+            let s = format!("{f}");
+            s.parse::<SqlDecimal>()
+                .expect("finite f64 must parse as SqlDecimal")
+        }
+    }
+}
+
+impl From<SqlMoney> for SqlDecimal {
+    /// Converts `SqlMoney` to `SqlDecimal`. NULL → NULL. Preserves 4-decimal scale.
+    fn from(v: SqlMoney) -> Self {
+        if v.is_null() {
+            SqlDecimal::NULL
+        } else {
+            v.to_sql_decimal()
+        }
+    }
+}
+
 // ── T046: to_f64 ──────────────────────────────────────────────────────────────
 
 impl SqlDecimal {
@@ -1704,6 +1755,55 @@ impl SqlDecimal {
                 }
             }
         }
+    }
+}
+
+impl SqlDecimal {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
+        }
+    }
+}
+
+impl SqlDecimal {
+    /// Converts to `SqlSingle`. NULL → NULL. May lose precision.
+    pub fn to_sql_single(&self) -> SqlSingle {
+        if self.is_null() {
+            SqlSingle::NULL
+        } else {
+            let f = self.to_f64().unwrap() as f32;
+            SqlSingle::new(f).unwrap_or(SqlSingle::NULL)
+        }
+    }
+
+    /// Converts to `SqlDouble`. NULL → NULL. May lose precision.
+    pub fn to_sql_double(&self) -> SqlDouble {
+        if self.is_null() {
+            SqlDouble::NULL
+        } else {
+            let f = self.to_f64().unwrap();
+            SqlDouble::new(f).unwrap_or(SqlDouble::NULL)
+        }
+    }
+
+    /// Converts to `SqlMoney`. NULL → NULL.
+    /// Returns `Err(Overflow)` if the value is outside the money range.
+    pub fn to_sql_money(&self) -> Result<SqlMoney, SqlTypeError> {
+        if self.is_null() {
+            return Ok(SqlMoney::NULL);
+        }
+        // Convert decimal to f64, then to i64×10000
+        let f = self.to_f64()?;
+        let scaled = f * 10_000.0;
+        if scaled > i64::MAX as f64 || scaled < i64::MIN as f64 || !scaled.is_finite() {
+            return Err(SqlTypeError::Overflow);
+        }
+        let raw = scaled.round() as i64;
+        Ok(SqlMoney::from_scaled(raw))
     }
 }
 
@@ -3477,5 +3577,127 @@ mod tests {
         let a = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
         let b = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
         assert_eq!(a.cmp(&b), Ordering::Equal);
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_integer() {
+        let d = SqlDecimal::new(5, 0, true, 12345, 0, 0, 0).unwrap();
+        let s = d.to_sql_string();
+        assert_eq!(s.value().unwrap(), "12345");
+    }
+
+    #[test]
+    fn to_sql_string_with_scale() {
+        let d = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
+        let s = d.to_sql_string();
+        assert_eq!(s.value().unwrap(), "123.45");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let d = SqlDecimal::new(5, 2, false, 12345, 0, 0, 0).unwrap();
+        let s = d.to_sql_string();
+        assert_eq!(s.value().unwrap(), "-123.45");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlDecimal::NULL.to_sql_string();
+        assert!(s.is_null());
+    }
+
+    // ── From<SqlSingle/SqlDouble/SqlMoney> tests ─────────────────────────────
+
+    #[test]
+    fn from_sql_single_normal() {
+        let d = SqlDecimal::from(SqlSingle::new(3.14).unwrap());
+        assert!(!d.is_null());
+        let f = d.to_f64().unwrap();
+        assert!((f - 3.14).abs() < 0.01);
+    }
+
+    #[test]
+    fn from_sql_single_null() {
+        let d = SqlDecimal::from(SqlSingle::NULL);
+        assert!(d.is_null());
+    }
+
+    #[test]
+    fn from_sql_double_normal() {
+        let d = SqlDecimal::from(SqlDouble::new(100.5).unwrap());
+        assert!(!d.is_null());
+        let f = d.to_f64().unwrap();
+        assert!((f - 100.5).abs() < 0.001);
+    }
+
+    #[test]
+    fn from_sql_double_null() {
+        let d = SqlDecimal::from(SqlDouble::NULL);
+        assert!(d.is_null());
+    }
+
+    #[test]
+    fn from_sql_money_normal() {
+        let m = SqlMoney::from_i32(100);
+        let d = SqlDecimal::from(m);
+        assert!(!d.is_null());
+        let f = d.to_f64().unwrap();
+        assert!((f - 100.0).abs() < 0.0001);
+    }
+
+    #[test]
+    fn from_sql_money_null() {
+        let d = SqlDecimal::from(SqlMoney::NULL);
+        assert!(d.is_null());
+    }
+
+    // ── to_sql_single/double/money tests ─────────────────────────────────────
+
+    #[test]
+    fn to_sql_single_normal() {
+        let d = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
+        let s = d.to_sql_single();
+        assert!(!s.is_null());
+        assert!((s.value().unwrap() - 123.45).abs() < 0.01);
+    }
+
+    #[test]
+    fn to_sql_single_null() {
+        assert!(SqlDecimal::NULL.to_sql_single().is_null());
+    }
+
+    #[test]
+    fn to_sql_double_normal() {
+        let d = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
+        let dbl = d.to_sql_double();
+        assert!(!dbl.is_null());
+        assert!((dbl.value().unwrap() - 123.45).abs() < 0.001);
+    }
+
+    #[test]
+    fn to_sql_double_null() {
+        assert!(SqlDecimal::NULL.to_sql_double().is_null());
+    }
+
+    #[test]
+    fn to_sql_money_normal() {
+        let d = SqlDecimal::new(5, 2, true, 12345, 0, 0, 0).unwrap();
+        let m = d.to_sql_money().unwrap();
+        assert!(!m.is_null());
+    }
+
+    #[test]
+    fn to_sql_money_null() {
+        let m = SqlDecimal::NULL.to_sql_money().unwrap();
+        assert!(m.is_null());
+    }
+
+    #[test]
+    fn to_sql_money_negative() {
+        let d = SqlDecimal::new(5, 2, false, 12345, 0, 0, 0).unwrap();
+        let m = d.to_sql_money().unwrap();
+        assert!(!m.is_null());
     }
 }

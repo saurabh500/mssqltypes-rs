@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE file in the project root for full license information.
 
 use crate::error::SqlTypeError;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -310,6 +311,17 @@ impl FromStr for SqlBoolean {
         Err(SqlTypeError::ParseError(format!(
             "Cannot parse '{s}' as SqlBoolean"
         )))
+    }
+}
+
+impl SqlBoolean {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
+        }
     }
 }
 
@@ -859,5 +871,26 @@ mod tests {
     fn test_parse_empty() {
         let result = "".parse::<SqlBoolean>();
         assert!(matches!(result, Err(SqlTypeError::ParseError(_))));
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_true() {
+        let s = SqlBoolean::TRUE.to_sql_string();
+        assert!(!s.is_null());
+        assert_eq!(s.value().unwrap(), "True");
+    }
+
+    #[test]
+    fn to_sql_string_false() {
+        let s = SqlBoolean::FALSE.to_sql_string();
+        assert_eq!(s.value().unwrap(), "False");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlBoolean::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }

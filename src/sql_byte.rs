@@ -4,6 +4,7 @@
 
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -385,6 +386,17 @@ impl From<SqlBoolean> for SqlByte {
                 Ok(false) => SqlByte::new(0),
                 Err(_) => SqlByte::NULL,
             }
+        }
+    }
+}
+
+impl SqlByte {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -938,5 +950,31 @@ mod tests {
     #[test]
     fn test_from_sql_boolean_null() {
         assert!(SqlByte::from(SqlBoolean::NULL).is_null());
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_normal() {
+        let s = SqlByte::new(42).to_sql_string();
+        assert_eq!(s.value().unwrap(), "42");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let s = SqlByte::new(0).to_sql_string();
+        assert_eq!(s.value().unwrap(), "0");
+    }
+
+    #[test]
+    fn to_sql_string_max() {
+        let s = SqlByte::new(255).to_sql_string();
+        assert_eq!(s.value().unwrap(), "255");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlByte::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }

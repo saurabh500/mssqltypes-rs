@@ -18,6 +18,7 @@ use crate::sql_int16::SqlInt16;
 use crate::sql_int32::SqlInt32;
 use crate::sql_int64::SqlInt64;
 use crate::sql_money::SqlMoney;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -507,6 +508,17 @@ impl SqlSingle {
             None => SqlBoolean::NULL,
             Some(0.0) => SqlBoolean::FALSE,
             Some(_) => SqlBoolean::TRUE,
+        }
+    }
+}
+
+impl SqlSingle {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -1500,5 +1512,31 @@ mod tests {
         assert!(!d.is_null());
 
         assert!(SqlSingle::NULL.to_sql_double().is_null());
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_positive() {
+        let s = SqlSingle::new(3.14).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "3.14");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let s = SqlSingle::new(-1.5).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "-1.5");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let s = SqlSingle::new(0.0).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "0");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlSingle::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }

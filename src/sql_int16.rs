@@ -12,6 +12,7 @@
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
 use crate::sql_byte::SqlByte;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -443,6 +444,17 @@ impl SqlInt16 {
                     Ok(SqlByte::new(v as u8))
                 }
             }
+        }
+    }
+}
+
+impl SqlInt16 {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -1405,5 +1417,31 @@ mod tests {
 
         let null_parsed: SqlInt16 = "Null".parse().unwrap();
         assert!(null_parsed.is_null());
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_positive() {
+        let s = SqlInt16::new(1234).to_sql_string();
+        assert_eq!(s.value().unwrap(), "1234");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let s = SqlInt16::new(-5678).to_sql_string();
+        assert_eq!(s.value().unwrap(), "-5678");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let s = SqlInt16::new(0).to_sql_string();
+        assert_eq!(s.value().unwrap(), "0");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlInt16::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }

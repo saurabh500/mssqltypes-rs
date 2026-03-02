@@ -15,6 +15,7 @@
 
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -633,6 +634,26 @@ impl Ord for SqlDateTime {
             (None, Some(_)) => Ordering::Less,
             (Some(_), None) => Ordering::Greater,
             (Some(a), Some(b)) => a.cmp(&b),
+        }
+    }
+}
+
+impl SqlDateTime {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
+        }
+    }
+
+    /// Parses a `SqlString` into a `SqlDateTime`.
+    /// NULL → Ok(NULL), invalid → Err(ParseError).
+    pub fn from_sql_string(s: &SqlString) -> Result<SqlDateTime, SqlTypeError> {
+        match s.value() {
+            Err(_) => Ok(SqlDateTime::NULL),
+            Ok(text) => text.parse::<SqlDateTime>(),
         }
     }
 }
@@ -1607,5 +1628,63 @@ mod tests {
     #[test]
     fn ord_null_null_equal() {
         assert_eq!(SqlDateTime::NULL.cmp(&SqlDateTime::NULL), Ordering::Equal);
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_value() {
+        let dt = SqlDateTime::new(2025, 7, 17, 12, 30, 45, 123.0).unwrap();
+        let s = dt.to_sql_string();
+        assert!(!s.is_null());
+        let text = s.value().unwrap();
+        assert!(text.starts_with("2025-07-17"));
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlDateTime::NULL.to_sql_string();
+        assert!(s.is_null());
+    }
+
+    #[test]
+    fn to_sql_string_epoch() {
+        let dt = SqlDateTime::new(1900, 1, 1, 0, 0, 0, 0.0).unwrap();
+        let s = dt.to_sql_string();
+        let text = s.value().unwrap();
+        assert!(text.starts_with("1900-01-01"));
+    }
+
+    // ── T034-T035: US7 — from_sql_string ──────────────────────────────────────
+
+    #[test]
+    fn from_sql_string_valid() {
+        let s = SqlString::new("2025-07-17 14:30:00");
+        let dt = SqlDateTime::from_sql_string(&s).unwrap();
+        assert!(!dt.is_null());
+        let text = format!("{dt}");
+        assert!(text.starts_with("2025-07-17"));
+    }
+
+    #[test]
+    fn from_sql_string_null() {
+        let dt = SqlDateTime::from_sql_string(&SqlString::NULL).unwrap();
+        assert!(dt.is_null());
+    }
+
+    #[test]
+    fn from_sql_string_invalid() {
+        let s = SqlString::new("not-a-date");
+        let result = SqlDateTime::from_sql_string(&s);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn from_sql_string_round_trip() {
+        let original = SqlDateTime::new(2000, 6, 15, 12, 30, 45, 0.0).unwrap();
+        let s = original.to_sql_string();
+        let restored = SqlDateTime::from_sql_string(&s).unwrap();
+        assert!(!restored.is_null());
+        assert_eq!(format!("{original}"), format!("{restored}"));
     }
 }

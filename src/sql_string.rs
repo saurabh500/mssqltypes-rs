@@ -8,7 +8,17 @@
 
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
+use crate::sql_byte::SqlByte;
 use crate::sql_compare_options::SqlCompareOptions;
+use crate::sql_datetime::SqlDateTime;
+use crate::sql_decimal::SqlDecimal;
+use crate::sql_double::SqlDouble;
+use crate::sql_guid::SqlGuid;
+use crate::sql_int16::SqlInt16;
+use crate::sql_int32::SqlInt32;
+use crate::sql_int64::SqlInt64;
+use crate::sql_money::SqlMoney;
+use crate::sql_single::SqlSingle;
 
 use std::cmp::Ordering;
 use std::fmt;
@@ -287,6 +297,98 @@ impl Ord for SqlString {
                 let lb = b.trim_end().to_ascii_lowercase();
                 la.cmp(&lb)
             }
+        }
+    }
+}
+
+// ── Cross-Type Parsing Conversions ───────────────────────────────────────────
+
+impl SqlString {
+    /// Parses this string as `SqlBoolean`. NULL → `Ok(SqlBoolean::NULL)`.
+    pub fn to_sql_boolean(&self) -> Result<SqlBoolean, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlBoolean::NULL),
+            Some(s) => s.parse::<SqlBoolean>(),
+        }
+    }
+
+    /// Parses this string as `SqlByte`. NULL → `Ok(SqlByte::NULL)`.
+    pub fn to_sql_byte(&self) -> Result<SqlByte, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlByte::NULL),
+            Some(s) => s.parse::<SqlByte>(),
+        }
+    }
+
+    /// Parses this string as `SqlInt16`. NULL → `Ok(SqlInt16::NULL)`.
+    pub fn to_sql_int16(&self) -> Result<SqlInt16, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlInt16::NULL),
+            Some(s) => s.parse::<SqlInt16>(),
+        }
+    }
+
+    /// Parses this string as `SqlInt32`. NULL → `Ok(SqlInt32::NULL)`.
+    pub fn to_sql_int32(&self) -> Result<SqlInt32, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlInt32::NULL),
+            Some(s) => s.parse::<SqlInt32>(),
+        }
+    }
+
+    /// Parses this string as `SqlInt64`. NULL → `Ok(SqlInt64::NULL)`.
+    pub fn to_sql_int64(&self) -> Result<SqlInt64, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlInt64::NULL),
+            Some(s) => s.parse::<SqlInt64>(),
+        }
+    }
+
+    /// Parses this string as `SqlSingle`. NULL → `Ok(SqlSingle::NULL)`.
+    pub fn to_sql_single(&self) -> Result<SqlSingle, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlSingle::NULL),
+            Some(s) => s.parse::<SqlSingle>(),
+        }
+    }
+
+    /// Parses this string as `SqlDouble`. NULL → `Ok(SqlDouble::NULL)`.
+    pub fn to_sql_double(&self) -> Result<SqlDouble, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlDouble::NULL),
+            Some(s) => s.parse::<SqlDouble>(),
+        }
+    }
+
+    /// Parses this string as `SqlDecimal`. NULL → `Ok(SqlDecimal::NULL)`.
+    pub fn to_sql_decimal(&self) -> Result<SqlDecimal, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlDecimal::NULL),
+            Some(s) => s.parse::<SqlDecimal>(),
+        }
+    }
+
+    /// Parses this string as `SqlMoney`. NULL → `Ok(SqlMoney::NULL)`.
+    pub fn to_sql_money(&self) -> Result<SqlMoney, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlMoney::NULL),
+            Some(s) => s.parse::<SqlMoney>(),
+        }
+    }
+
+    /// Parses this string as `SqlDateTime`. NULL → `Ok(SqlDateTime::NULL)`.
+    pub fn to_sql_date_time(&self) -> Result<SqlDateTime, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlDateTime::NULL),
+            Some(s) => s.parse::<SqlDateTime>(),
+        }
+    }
+
+    /// Parses this string as `SqlGuid`. NULL → `Ok(SqlGuid::NULL)`.
+    pub fn to_sql_guid(&self) -> Result<SqlGuid, SqlTypeError> {
+        match &self.value {
+            None => Ok(SqlGuid::NULL),
+            Some(s) => s.parse::<SqlGuid>(),
         }
     }
 }
@@ -970,5 +1072,278 @@ mod tests {
             SqlString::new("hello").cmp(&SqlString::new("hello   ")),
             std::cmp::Ordering::Equal
         );
+    }
+
+    // ── to_sql_boolean() tests ───────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_boolean_true() {
+        let s = SqlString::new("True");
+        let b = s.to_sql_boolean().unwrap();
+        assert_eq!(b, SqlBoolean::TRUE);
+    }
+
+    #[test]
+    fn to_sql_boolean_false() {
+        let s = SqlString::new("false");
+        let b = s.to_sql_boolean().unwrap();
+        assert_eq!(b, SqlBoolean::FALSE);
+    }
+
+    #[test]
+    fn to_sql_boolean_invalid() {
+        let s = SqlString::new("maybe");
+        assert!(matches!(
+            s.to_sql_boolean(),
+            Err(SqlTypeError::ParseError(_))
+        ));
+    }
+
+    #[test]
+    fn to_sql_boolean_null() {
+        let b = SqlString::NULL.to_sql_boolean().unwrap();
+        assert!(b.is_null());
+    }
+
+    // ── to_sql_byte() tests ─────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_byte_valid() {
+        let s = SqlString::new("200");
+        let b = s.to_sql_byte().unwrap();
+        assert_eq!(b.value().unwrap(), 200);
+    }
+
+    #[test]
+    fn to_sql_byte_invalid() {
+        let s = SqlString::new("abc");
+        assert!(s.to_sql_byte().is_err());
+    }
+
+    #[test]
+    fn to_sql_byte_overflow() {
+        let s = SqlString::new("300");
+        assert!(s.to_sql_byte().is_err());
+    }
+
+    #[test]
+    fn to_sql_byte_null() {
+        let b = SqlString::NULL.to_sql_byte().unwrap();
+        assert!(b.is_null());
+    }
+
+    // ── to_sql_int16() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_int16_valid() {
+        let s = SqlString::new("1234");
+        let v = s.to_sql_int16().unwrap();
+        assert_eq!(v.value().unwrap(), 1234);
+    }
+
+    #[test]
+    fn to_sql_int16_negative() {
+        let s = SqlString::new("-5678");
+        let v = s.to_sql_int16().unwrap();
+        assert_eq!(v.value().unwrap(), -5678);
+    }
+
+    #[test]
+    fn to_sql_int16_invalid() {
+        let s = SqlString::new("not_a_number");
+        assert!(s.to_sql_int16().is_err());
+    }
+
+    #[test]
+    fn to_sql_int16_null() {
+        let v = SqlString::NULL.to_sql_int16().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_int32() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_int32_valid() {
+        let s = SqlString::new("123456");
+        let v = s.to_sql_int32().unwrap();
+        assert_eq!(v.value().unwrap(), 123456);
+    }
+
+    #[test]
+    fn to_sql_int32_invalid() {
+        let s = SqlString::new("xyz");
+        assert!(s.to_sql_int32().is_err());
+    }
+
+    #[test]
+    fn to_sql_int32_null() {
+        let v = SqlString::NULL.to_sql_int32().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_int64() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_int64_valid() {
+        let s = SqlString::new("9876543210");
+        let v = s.to_sql_int64().unwrap();
+        assert_eq!(v.value().unwrap(), 9876543210);
+    }
+
+    #[test]
+    fn to_sql_int64_invalid() {
+        let s = SqlString::new("bad");
+        assert!(s.to_sql_int64().is_err());
+    }
+
+    #[test]
+    fn to_sql_int64_null() {
+        let v = SqlString::NULL.to_sql_int64().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_single() tests ───────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_single_valid() {
+        let s = SqlString::new("3.14");
+        let v = s.to_sql_single().unwrap();
+        assert_eq!(v.value().unwrap(), 3.14_f32);
+    }
+
+    #[test]
+    fn to_sql_single_invalid() {
+        let s = SqlString::new("not_float");
+        assert!(s.to_sql_single().is_err());
+    }
+
+    #[test]
+    fn to_sql_single_null() {
+        let v = SqlString::NULL.to_sql_single().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_double() tests ───────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_double_valid() {
+        let s = SqlString::new("3.14159");
+        let v = s.to_sql_double().unwrap();
+        assert_eq!(v.value().unwrap(), 3.14159_f64);
+    }
+
+    #[test]
+    fn to_sql_double_invalid() {
+        let s = SqlString::new("not_double");
+        assert!(s.to_sql_double().is_err());
+    }
+
+    #[test]
+    fn to_sql_double_null() {
+        let v = SqlString::NULL.to_sql_double().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_decimal() tests ──────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_decimal_valid() {
+        let s = SqlString::new("123.45");
+        let v = s.to_sql_decimal().unwrap();
+        assert!(!v.is_null());
+        assert_eq!(format!("{v}"), "123.45");
+    }
+
+    #[test]
+    fn to_sql_decimal_invalid() {
+        let s = SqlString::new("not_decimal");
+        assert!(s.to_sql_decimal().is_err());
+    }
+
+    #[test]
+    fn to_sql_decimal_null() {
+        let v = SqlString::NULL.to_sql_decimal().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_money() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_money_valid() {
+        let s = SqlString::new("100.50");
+        let v = s.to_sql_money().unwrap();
+        assert!(!v.is_null());
+    }
+
+    #[test]
+    fn to_sql_money_invalid() {
+        let s = SqlString::new("not_money");
+        assert!(s.to_sql_money().is_err());
+    }
+
+    #[test]
+    fn to_sql_money_null() {
+        let v = SqlString::NULL.to_sql_money().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_date_time() tests ────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_date_time_valid() {
+        let s = SqlString::new("2025-01-15 10:30:00.000");
+        let v = s.to_sql_date_time().unwrap();
+        assert!(!v.is_null());
+    }
+
+    #[test]
+    fn to_sql_date_time_invalid() {
+        let s = SqlString::new("not_a_date");
+        assert!(s.to_sql_date_time().is_err());
+    }
+
+    #[test]
+    fn to_sql_date_time_null() {
+        let v = SqlString::NULL.to_sql_date_time().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── to_sql_guid() tests ─────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_guid_valid() {
+        let s = SqlString::new("6f9619ff-8b86-d011-b42d-00cf4fc964ff");
+        let v = s.to_sql_guid().unwrap();
+        assert!(!v.is_null());
+    }
+
+    #[test]
+    fn to_sql_guid_invalid() {
+        let s = SqlString::new("not-a-guid");
+        assert!(s.to_sql_guid().is_err());
+    }
+
+    #[test]
+    fn to_sql_guid_null() {
+        let v = SqlString::NULL.to_sql_guid().unwrap();
+        assert!(v.is_null());
+    }
+
+    // ── Round-trip tests ────────────────────────────────────────────────────
+
+    #[test]
+    fn roundtrip_int32() {
+        let original = SqlInt32::new(42);
+        let s = original.to_sql_string();
+        let back = s.to_sql_int32().unwrap();
+        assert_eq!(back.value().unwrap(), 42);
+    }
+
+    #[test]
+    fn roundtrip_boolean() {
+        let original = SqlBoolean::TRUE;
+        let s = original.to_sql_string();
+        let back = s.to_sql_boolean().unwrap();
+        assert!(back.is_true());
     }
 }
