@@ -19,9 +19,9 @@
 
 **Purpose**: Module registration and project wiring
 
-- [ ] T001 Create `src/sql_compare_options.rs` with module-level doc comment and empty `SqlCompareOptions` enum definition
-- [ ] T002 [P] Create `src/sql_string.rs` with module-level doc comment, imports (`crate::error::SqlTypeError`, `crate::sql_boolean::SqlBoolean`, `crate::sql_compare_options::SqlCompareOptions`, `std::fmt`, `std::str::FromStr`, `std::ops::Add`, `std::hash`, `std::cmp`), and empty struct definition
-- [ ] T003 Register modules in `src/lib.rs`: add `pub mod sql_compare_options;` and `pub mod sql_string;`, add `pub use sql_compare_options::SqlCompareOptions;` and `pub use sql_string::SqlString;`
+- [x] T001 Create `src/sql_compare_options.rs` with module-level doc comment and empty `SqlCompareOptions` enum definition
+- [x] T002 [P] Create `src/sql_string.rs` with module-level doc comment, imports (`crate::error::SqlTypeError`, `crate::sql_boolean::SqlBoolean`, `crate::sql_compare_options::SqlCompareOptions`, `std::fmt`, `std::str::FromStr`, `std::ops::Add`, `std::hash`, `std::cmp`), and empty struct definition
+- [x] T003 Register modules in `src/lib.rs`: add `pub mod sql_compare_options;` and `pub mod sql_string;`, add `pub use sql_compare_options::SqlCompareOptions;` and `pub use sql_string::SqlString;`
 
 **Checkpoint**: `cargo build` compiles with empty `SqlCompareOptions` enum and `SqlString` struct.
 
@@ -35,10 +35,10 @@
 
 **TDD Note**: Phase 2 implements foundational scaffolding (enum, struct, constants, constructors) before their tests in Phase 3. This is an intentional deviation from strict TDD — the types must exist for test code to compile. Tests in Phase 3 (T008–T012) validate all Phase 2 work before any further phases proceed. This matches the established pattern from SqlInt32/SqlInt64.
 
-- [ ] T004 Define `SqlCompareOptions` enum with variants `None`, `IgnoreCase`, `BinarySort`, `BinarySort2`; derive `Copy, Clone, Debug, PartialEq, Eq, Hash, Default` (with `#[default] IgnoreCase`) in `src/sql_compare_options.rs`
-- [ ] T005 Define `SqlString` struct with `value: Option<String>` and `compare_options: SqlCompareOptions` fields; derive `Clone, Debug` in `src/sql_string.rs`
-- [ ] T006 Implement `SqlString::NULL` constant (`value: None, compare_options: IgnoreCase`), `new(s: &str) -> Self` (with default `IgnoreCase` options), `with_options(s: &str, options: SqlCompareOptions) -> Self` in `src/sql_string.rs`
-- [ ] T007 Implement `is_null() -> bool`, `value() -> Result<&str, SqlTypeError>`, `len() -> Result<usize, SqlTypeError>`, `compare_options() -> SqlCompareOptions` in `src/sql_string.rs`
+- [x] T004 Define `SqlCompareOptions` enum with variants `None`, `IgnoreCase`, `BinarySort`, `BinarySort2`; derive `Copy, Clone, Debug, PartialEq, Eq, Hash, Default` (with `#[default] IgnoreCase`) in `src/sql_compare_options.rs`
+- [x] T005 Define `SqlString` struct with `value: Option<String>` and `compare_options: SqlCompareOptions` fields; derive `Clone, Debug` in `src/sql_string.rs`
+- [x] T006 Implement `SqlString::NULL` constant (`value: None, compare_options: IgnoreCase`), `new(s: &str) -> Self` (with default `IgnoreCase` options), `with_options(s: &str, options: SqlCompareOptions) -> Self` in `src/sql_string.rs`
+- [x] T007 Implement `is_null() -> bool`, `value() -> Result<&str, SqlTypeError>`, `len() -> Result<usize, SqlTypeError>`, `compare_options() -> SqlCompareOptions` in `src/sql_string.rs`
 
 **Checkpoint**: Foundation ready — `SqlCompareOptions` enum, `SqlString::new()`, `with_options()`, `is_null()`, `value()`, `len()`, `compare_options()`, `NULL` constant all work. `cargo build` compiles.
 
@@ -52,11 +52,11 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Write tests for `SqlCompareOptions` — all 4 variants exist, `Default` returns `IgnoreCase`, `Copy`/`Clone`/`Debug`/`PartialEq`/`Eq`/`Hash` work in `src/sql_compare_options.rs`
-- [ ] T009 [P] [US1] Write tests for `new()`, `is_null()`, `value()` — create "hello" and verify value, NULL access returns `Err(NullValue)`, empty string is not NULL, `is_null()` returns false for non-null in `src/sql_string.rs`
-- [ ] T010 [P] [US1] Write tests for `len()` — "hello" returns 5, empty string returns 0, multi-byte UTF-8 ("🦀") returns 4, NULL returns `Err(NullValue)` in `src/sql_string.rs`
-- [ ] T011 [P] [US1] Write tests for `with_options()` — create with each of the 4 `SqlCompareOptions` variants, verify `compare_options()` returns the correct variant in `src/sql_string.rs`
-- [ ] T012 [P] [US1] Write tests for default options — `SqlString::new("hello").compare_options()` returns `IgnoreCase`, `SqlString::NULL` has `IgnoreCase` options in `src/sql_string.rs`
+- [x] T008 [P] [US1] Write tests for `SqlCompareOptions` — all 4 variants exist, `Default` returns `IgnoreCase`, `Copy`/`Clone`/`Debug`/`PartialEq`/`Eq`/`Hash` work in `src/sql_compare_options.rs`
+- [x] T009 [P] [US1] Write tests for `new()`, `is_null()`, `value()` — create "hello" and verify value, NULL access returns `Err(NullValue)`, empty string is not NULL, `is_null()` returns false for non-null in `src/sql_string.rs`
+- [x] T010 [P] [US1] Write tests for `len()` — "hello" returns 5, empty string returns 0, multi-byte UTF-8 ("🦀") returns 4, NULL returns `Err(NullValue)` in `src/sql_string.rs`
+- [x] T011 [P] [US1] Write tests for `with_options()` — create with each of the 4 `SqlCompareOptions` variants, verify `compare_options()` returns the correct variant in `src/sql_string.rs`
+- [x] T012 [P] [US1] Write tests for default options — `SqlString::new("hello").compare_options()` returns `IgnoreCase`, `SqlString::NULL` has `IgnoreCase` options in `src/sql_string.rs`
 
 **Checkpoint**: All US1 acceptance scenarios (7 scenarios) pass. `cargo test` green.
 
@@ -70,13 +70,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T013 [P] [US2] Write tests for `Add` operator — "hello" + " world" = "hello world", "" + "hello" = "hello", "hello" + "" = "hello" in `src/sql_string.rs`
-- [ ] T014 [P] [US2] Write tests for NULL propagation in concatenation — non-null + NULL = NULL, NULL + non-null = NULL, NULL + NULL = NULL in `src/sql_string.rs`
-- [ ] T015 [P] [US2] Write tests for compare options inheritance in concatenation — left operand's options govern result, verify with `IgnoreCase` + `BinarySort` and `BinarySort` + `IgnoreCase` in `src/sql_string.rs`
+- [x] T013 [P] [US2] Write tests for `Add` operator — "hello" + " world" = "hello world", "" + "hello" = "hello", "hello" + "" = "hello" in `src/sql_string.rs`
+- [x] T014 [P] [US2] Write tests for NULL propagation in concatenation — non-null + NULL = NULL, NULL + non-null = NULL, NULL + NULL = NULL in `src/sql_string.rs`
+- [x] T015 [P] [US2] Write tests for compare options inheritance in concatenation — left operand's options govern result, verify with `IgnoreCase` + `BinarySort` and `BinarySort` + `IgnoreCase` in `src/sql_string.rs`
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Implement `Add<SqlString> for SqlString` with NULL propagation, left operand's options inheritance in `src/sql_string.rs`
+- [x] T016 [US2] Implement `Add<SqlString> for SqlString` with NULL propagation, left operand's options inheritance in `src/sql_string.rs`
 
 **Checkpoint**: All US2 acceptance scenarios (5 scenarios) pass. `cargo test` green.
 
@@ -90,16 +90,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T017 [P] [US3] Write tests for IgnoreCase comparisons — "ABC" eq "abc" = TRUE, "apple" lt "banana" = TRUE, "Hello" eq "hello" = TRUE, trailing spaces ignored ("hello" eq "hello   " = TRUE) in `src/sql_string.rs`
-- [ ] T018 [P] [US3] Write tests for BinarySort comparisons — "ABC" eq "abc" = FALSE, "A" lt "a" = TRUE (0x41 < 0x61), "abc" eq "abc" = TRUE in `src/sql_string.rs`
-- [ ] T019 [P] [US3] Write tests for None (ordinal) comparisons — "Hello" eq "hello" = FALSE (case-sensitive), "abc" eq "abc" = TRUE, "A" lt "B" = TRUE in `src/sql_string.rs`
-- [ ] T020 [P] [US3] Write tests for NULL propagation — all 6 comparison methods with NULL on left, NULL on right, both NULL all return `SqlBoolean::NULL` in `src/sql_string.rs`
-- [ ] T021 [P] [US3] Write tests for left-operand-options-govern — `IgnoreCase("hello")` compared with `BinarySort("HELLO")` uses IgnoreCase (equals TRUE), `BinarySort("hello")` compared with `IgnoreCase("HELLO")` uses BinarySort (equals FALSE) in `src/sql_string.rs`
+- [x] T017 [P] [US3] Write tests for IgnoreCase comparisons — "ABC" eq "abc" = TRUE, "apple" lt "banana" = TRUE, "Hello" eq "hello" = TRUE, trailing spaces ignored ("hello" eq "hello   " = TRUE) in `src/sql_string.rs`
+- [x] T018 [P] [US3] Write tests for BinarySort comparisons — "ABC" eq "abc" = FALSE, "A" lt "a" = TRUE (0x41 < 0x61), "abc" eq "abc" = TRUE in `src/sql_string.rs`
+- [x] T019 [P] [US3] Write tests for None (ordinal) comparisons — "Hello" eq "hello" = FALSE (case-sensitive), "abc" eq "abc" = TRUE, "A" lt "B" = TRUE in `src/sql_string.rs`
+- [x] T020 [P] [US3] Write tests for NULL propagation — all 6 comparison methods with NULL on left, NULL on right, both NULL all return `SqlBoolean::NULL` in `src/sql_string.rs`
+- [x] T021 [P] [US3] Write tests for left-operand-options-govern — `IgnoreCase("hello")` compared with `BinarySort("HELLO")` uses IgnoreCase (equals TRUE), `BinarySort("hello")` compared with `IgnoreCase("HELLO")` uses BinarySort (equals FALSE) in `src/sql_string.rs`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Implement private helper `compare_strings(&self, other: &SqlString) -> Option<std::cmp::Ordering>` — trim trailing spaces, dispatch on `self.compare_options` to ordinal/case-insensitive/byte comparison in `src/sql_string.rs`
-- [ ] T023 [US3] Implement `sql_equals`, `sql_not_equals`, `sql_less_than`, `sql_greater_than`, `sql_less_than_or_equal`, `sql_greater_than_or_equal` using `compare_strings` helper, NULL propagation in `src/sql_string.rs`
+- [x] T022 [US3] Implement private helper `compare_strings(&self, other: &SqlString) -> Option<std::cmp::Ordering>` — trim trailing spaces, dispatch on `self.compare_options` to ordinal/case-insensitive/byte comparison in `src/sql_string.rs`
+- [x] T023 [US3] Implement `sql_equals`, `sql_not_equals`, `sql_less_than`, `sql_greater_than`, `sql_less_than_or_equal`, `sql_greater_than_or_equal` using `compare_strings` helper, NULL propagation in `src/sql_string.rs`
 
 **Checkpoint**: All US3 acceptance scenarios (6 scenarios) pass. SC-001 (5 case-insensitive test pairs) and SC-002 (binary vs case-insensitive differs) verified. `cargo test` green.
 
@@ -113,7 +113,7 @@
 
 ### Tests for User Story 4
 
-- [ ] T024 [P] [US4] Write end-to-end tests for each compare option variant — create with `None`, compare case-sensitive; create with `IgnoreCase`, compare case-insensitive; create with `BinarySort`, compare bytes; create with `BinarySort2`, verify same as `BinarySort` in `src/sql_string.rs`
+- [x] T024 [P] [US4] Write end-to-end tests for each compare option variant — create with `None`, compare case-sensitive; create with `IgnoreCase`, compare case-insensitive; create with `BinarySort`, compare bytes; create with `BinarySort2`, verify same as `BinarySort` in `src/sql_string.rs`
 
 **Checkpoint**: All US4 acceptance scenarios (3 scenarios) pass. `cargo test` green.
 
@@ -127,13 +127,13 @@
 
 ### Tests for User Story 5
 
-- [ ] T025 [P] [US5] Write tests for `Display` — "hello" displays as "hello", empty string displays as "", NULL displays as "Null" in `src/sql_string.rs`
-- [ ] T026 [P] [US5] Write tests for `FromStr` — "hello" parses to `SqlString("hello")`, "Null"/"null"/"NULL"/"nUlL" all parse to NULL, parsed value has default `IgnoreCase` options in `src/sql_string.rs`
+- [x] T025 [P] [US5] Write tests for `Display` — "hello" displays as "hello", empty string displays as "", NULL displays as "Null" in `src/sql_string.rs`
+- [x] T026 [P] [US5] Write tests for `FromStr` — "hello" parses to `SqlString("hello")`, "Null"/"null"/"NULL"/"nUlL" all parse to NULL, parsed value has default `IgnoreCase` options in `src/sql_string.rs`
 
 ### Implementation for User Story 5
 
-- [ ] T027 [US5] Implement `Display` for SqlString (NULL → "Null", non-null → raw value) in `src/sql_string.rs`
-- [ ] T028 [US5] Implement `FromStr` for SqlString ("Null" case-insensitive → NULL, else `new(input)`) in `src/sql_string.rs`
+- [x] T027 [US5] Implement `Display` for SqlString (NULL → "Null", non-null → raw value) in `src/sql_string.rs`
+- [x] T028 [US5] Implement `FromStr` for SqlString ("Null" case-insensitive → NULL, else `new(input)`) in `src/sql_string.rs`
 
 **Checkpoint**: All US5 acceptance scenarios (4 scenarios) pass. Display/FromStr round-trip verified. `cargo test` green.
 
@@ -145,19 +145,19 @@
 
 ### Tests
 
-- [ ] T029 [P] Write tests for `From<&str>` and `From<String>` — `"hello".into()` creates SqlString with value "hello" and IgnoreCase options, `String::from("world").into()` creates SqlString, verify no unnecessary clone for `From<String>` in `src/sql_string.rs`
-- [ ] T030 [P] Write tests for `PartialEq`/`Eq` — case-insensitive equality ("Hello" == "hello"), trailing-space-trimmed ("hello" == "hello   "), NULL == NULL, NULL != non-null, different compare options same value are equal in `src/sql_string.rs`
-- [ ] T031 [P] Write tests for `Hash` — equal values (case-different) hash equal, NULL hashes consistently, can insert into `HashSet` and find case-insensitive in `src/sql_string.rs`
-- [ ] T032 [P] Write tests for `PartialOrd`/`Ord` — NULL < any non-null, case-insensitive ordering ("apple" < "Banana"), equal values with different case in `src/sql_string.rs`
+- [x] T029 [P] Write tests for `From<&str>` and `From<String>` — `"hello".into()` creates SqlString with value "hello" and IgnoreCase options, `String::from("world").into()` creates SqlString, verify no unnecessary clone for `From<String>` in `src/sql_string.rs`
+- [x] T030 [P] Write tests for `PartialEq`/`Eq` — case-insensitive equality ("Hello" == "hello"), trailing-space-trimmed ("hello" == "hello   "), NULL == NULL, NULL != non-null, different compare options same value are equal in `src/sql_string.rs`
+- [x] T031 [P] Write tests for `Hash` — equal values (case-different) hash equal, NULL hashes consistently, can insert into `HashSet` and find case-insensitive in `src/sql_string.rs`
+- [x] T032 [P] Write tests for `PartialOrd`/`Ord` — NULL < any non-null, case-insensitive ordering ("apple" < "Banana"), equal values with different case in `src/sql_string.rs`
 
 ### Implementation
 
-- [ ] T033 Implement `From<&str> for SqlString` and `From<String> for SqlString` (both with default `IgnoreCase` options; `From<String>` avoids clone) in `src/sql_string.rs`
-- [ ] T034 Implement `PartialEq`, `Eq` for SqlString (case-insensitive ASCII, trailing-space-trimmed; NULL == NULL) in `src/sql_string.rs`
-- [ ] T035 Implement `Hash` for SqlString (hash of lowercased + trimmed value; NULL hashes as empty string) in `src/sql_string.rs`
-- [ ] T036 Implement `PartialOrd`, `Ord` for SqlString (case-insensitive; NULL < any non-NULL) in `src/sql_string.rs`
-- [ ] T037 Run `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test` — all must pass
-- [ ] T038 Run quickstart.md scenarios as validation smoke test
+- [x] T033 Implement `From<&str> for SqlString` and `From<String> for SqlString` (both with default `IgnoreCase` options; `From<String>` avoids clone) in `src/sql_string.rs`
+- [x] T034 Implement `PartialEq`, `Eq` for SqlString (case-insensitive ASCII, trailing-space-trimmed; NULL == NULL) in `src/sql_string.rs`
+- [x] T035 Implement `Hash` for SqlString (hash of lowercased + trimmed value; NULL hashes as empty string) in `src/sql_string.rs`
+- [x] T036 Implement `PartialOrd`, `Ord` for SqlString (case-insensitive; NULL < any non-NULL) in `src/sql_string.rs`
+- [x] T037 Run `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test` — all must pass
+- [x] T038 Run quickstart.md scenarios as validation smoke test
 
 **Checkpoint**: All quality gates pass. ≥95% coverage. `cargo fmt`, `cargo clippy`, `cargo test` all green.
 
