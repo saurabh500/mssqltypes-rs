@@ -9,6 +9,7 @@ pub mod sql_int16;
 pub mod sql_int32;
 pub mod sql_int64;
 pub mod sql_money;
+pub mod sql_single;
 
 pub use error::SqlTypeError;
 pub use sql_binary::SqlBinary;
@@ -21,3 +22,4 @@ pub use sql_int16::SqlInt16;
 pub use sql_int32::SqlInt32;
 pub use sql_int64::SqlInt64;
 pub use sql_money::SqlMoney;
+pub use sql_single::SqlSingle;
