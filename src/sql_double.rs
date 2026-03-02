@@ -15,6 +15,8 @@ use crate::sql_int16::SqlInt16;
 use crate::sql_int32::SqlInt32;
 use crate::sql_int64::SqlInt64;
 use crate::sql_money::SqlMoney;
+use crate::sql_single::SqlSingle;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -466,6 +468,20 @@ impl SqlDouble {
             SqlDouble::ZERO
         }
     }
+
+    /// Widens `SqlSingle` (f32) to `SqlDouble` (f64). NULL → NULL.
+    pub fn from_sql_single(v: SqlSingle) -> SqlDouble {
+        if v.is_null() {
+            SqlDouble::NULL
+        } else {
+            match v.value() {
+                Ok(f) => SqlDouble {
+                    value: Some(f64::from(f)),
+                },
+                Err(_) => SqlDouble::NULL,
+            }
+        }
+    }
 }
 
 // ── Conversions: OUT of SqlDouble ────────────────────────────────────────────
@@ -477,6 +493,33 @@ impl SqlDouble {
             None => SqlBoolean::NULL,
             Some(0.0) => SqlBoolean::FALSE,
             Some(_) => SqlBoolean::TRUE,
+        }
+    }
+
+    /// Narrows to `SqlSingle` (f32). Returns `Err(Overflow)` if the f64 value
+    /// is finite but out of f32 range (result becomes infinite). NULL → `Ok(SqlSingle::NULL)`.
+    pub fn to_sql_single(&self) -> Result<SqlSingle, SqlTypeError> {
+        match self.value {
+            None => Ok(SqlSingle::NULL),
+            Some(v) => {
+                let narrowed = v as f32;
+                if narrowed.is_infinite() && v.is_finite() {
+                    Err(SqlTypeError::Overflow)
+                } else {
+                    Ok(SqlSingle::new(narrowed)?)
+                }
+            }
+        }
+    }
+}
+
+impl SqlDouble {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -1393,5 +1436,98 @@ mod tests {
             let parsed: SqlDouble = s.parse().unwrap();
             assert_eq!(d, parsed, "roundtrip failed for {v}");
         }
+    }
+
+    // ── from_sql_single() tests ──────────────────────────────────────────
+
+    #[test]
+    fn from_sql_single_normal() {
+        let s = SqlSingle::new(3.14).unwrap();
+        let d = SqlDouble::from_sql_single(s);
+        assert!(!d.is_null());
+        assert!((d.value().unwrap() - 3.14f64).abs() < 0.001);
+    }
+
+    #[test]
+    fn from_sql_single_zero() {
+        let s = SqlSingle::new(0.0).unwrap();
+        let d = SqlDouble::from_sql_single(s);
+        assert_eq!(d.value().unwrap(), 0.0);
+    }
+
+    #[test]
+    fn from_sql_single_null() {
+        let d = SqlDouble::from_sql_single(SqlSingle::NULL);
+        assert!(d.is_null());
+    }
+
+    #[test]
+    fn from_sql_single_max() {
+        let s = SqlSingle::new(f32::MAX).unwrap();
+        let d = SqlDouble::from_sql_single(s);
+        assert_eq!(d.value().unwrap(), f32::MAX as f64);
+    }
+
+    // ── to_sql_single() tests ───────────────────────────────────────────
+
+    #[test]
+    fn to_sql_single_normal() {
+        let d = SqlDouble::new(3.14).unwrap();
+        let s = d.to_sql_single().unwrap();
+        assert!((s.value().unwrap() - 3.14f32).abs() < 0.001);
+    }
+
+    #[test]
+    fn to_sql_single_overflow() {
+        let d = SqlDouble::new(1e300).unwrap();
+        let result = d.to_sql_single();
+        assert!(matches!(result, Err(SqlTypeError::Overflow)));
+    }
+
+    #[test]
+    fn to_sql_single_null() {
+        let d = SqlDouble::NULL;
+        let s = d.to_sql_single().unwrap();
+        assert!(s.is_null());
+    }
+
+    #[test]
+    fn to_sql_single_f32_max_roundtrip() {
+        let d = SqlDouble::new(f32::MAX as f64).unwrap();
+        let s = d.to_sql_single().unwrap();
+        assert_eq!(s.value().unwrap(), f32::MAX);
+    }
+
+    #[test]
+    fn to_sql_single_negative_overflow() {
+        let d = SqlDouble::new(-1e300).unwrap();
+        let result = d.to_sql_single();
+        assert!(matches!(result, Err(SqlTypeError::Overflow)));
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_positive() {
+        let s = SqlDouble::new(3.14159).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "3.14159");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let s = SqlDouble::new(-2.5).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "-2.5");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let s = SqlDouble::new(0.0).unwrap().to_sql_string();
+        assert_eq!(s.value().unwrap(), "0");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlDouble::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }
