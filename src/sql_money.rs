@@ -11,9 +11,12 @@
 use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
 use crate::sql_byte::SqlByte;
+use crate::sql_double::SqlDouble;
 use crate::sql_int16::SqlInt16;
 use crate::sql_int32::SqlInt32;
 use crate::sql_int64::SqlInt64;
+use crate::sql_single::SqlSingle;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -689,6 +692,59 @@ impl SqlMoney {
                 SqlDecimal::new(19, 4, positive, data1, data2, 0, 0)
                     .expect("SqlMoney value always fits in SqlDecimal(19,4)")
             }
+        }
+    }
+}
+
+impl SqlMoney {
+    /// Creates `SqlMoney` from `SqlSingle`. NULL → `Ok(NULL)`.
+    /// Returns `Err(Overflow)` if the value overflows the money range.
+    pub fn from_sql_single(v: SqlSingle) -> Result<SqlMoney, SqlTypeError> {
+        if v.is_null() {
+            return Ok(SqlMoney::NULL);
+        }
+        SqlMoney::from_f64(v.value().unwrap() as f64)
+    }
+
+    /// Creates `SqlMoney` from `SqlDouble`. NULL → `Ok(NULL)`.
+    /// Returns `Err(Overflow)` if the value overflows the money range.
+    pub fn from_sql_double(v: SqlDouble) -> Result<SqlMoney, SqlTypeError> {
+        if v.is_null() {
+            return Ok(SqlMoney::NULL);
+        }
+        SqlMoney::from_f64(v.value().unwrap())
+    }
+
+    /// Converts to `SqlSingle`. NULL → NULL.
+    pub fn to_sql_single(&self) -> SqlSingle {
+        if self.is_null() {
+            SqlSingle::NULL
+        } else {
+            let raw = self.scaled_value().unwrap();
+            let f = raw as f64 / 10_000.0;
+            SqlSingle::new(f as f32).unwrap_or(SqlSingle::NULL)
+        }
+    }
+
+    /// Converts to `SqlDouble`. NULL → NULL.
+    pub fn to_sql_double(&self) -> SqlDouble {
+        if self.is_null() {
+            SqlDouble::NULL
+        } else {
+            let raw = self.scaled_value().unwrap();
+            let f = raw as f64 / 10_000.0;
+            SqlDouble::new(f).unwrap_or(SqlDouble::NULL)
+        }
+    }
+}
+
+impl SqlMoney {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -1749,5 +1805,88 @@ mod tests {
             SqlMoney::from_i32(42).cmp(&SqlMoney::from_i32(42)),
             Ordering::Equal
         );
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_positive() {
+        let m = SqlMoney::from_i32(100);
+        let s = m.to_sql_string();
+        assert_eq!(s.value().unwrap(), "100.00");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let m = SqlMoney::from_i32(-50);
+        let s = m.to_sql_string();
+        assert_eq!(s.value().unwrap(), "-50.00");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let m = SqlMoney::from_i32(0);
+        let s = m.to_sql_string();
+        assert_eq!(s.value().unwrap(), "0.00");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlMoney::NULL.to_sql_string();
+        assert!(s.is_null());
+    }
+
+    // ── from_sql_single/double, to_sql_single/double tests ────────────────
+
+    #[test]
+    fn from_sql_single_normal() {
+        let result = SqlMoney::from_sql_single(SqlSingle::new(100.5).unwrap()).unwrap();
+        assert!(!result.is_null());
+        let f = result.scaled_value().unwrap() as f64 / 10_000.0;
+        assert!((f - 100.5).abs() < 0.001);
+    }
+
+    #[test]
+    fn from_sql_single_null() {
+        let result = SqlMoney::from_sql_single(SqlSingle::NULL).unwrap();
+        assert!(result.is_null());
+    }
+
+    #[test]
+    fn from_sql_double_normal() {
+        let result = SqlMoney::from_sql_double(SqlDouble::new(100.5).unwrap()).unwrap();
+        assert!(!result.is_null());
+    }
+
+    #[test]
+    fn from_sql_double_null() {
+        let result = SqlMoney::from_sql_double(SqlDouble::NULL).unwrap();
+        assert!(result.is_null());
+    }
+
+    #[test]
+    fn to_sql_single_normal() {
+        let m = SqlMoney::from_i32(100);
+        let s = m.to_sql_single();
+        assert!(!s.is_null());
+        assert!((s.value().unwrap() - 100.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn to_sql_single_null() {
+        assert!(SqlMoney::NULL.to_sql_single().is_null());
+    }
+
+    #[test]
+    fn to_sql_double_normal() {
+        let m = SqlMoney::from_i32(100);
+        let d = m.to_sql_double();
+        assert!(!d.is_null());
+        assert!((d.value().unwrap() - 100.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn to_sql_double_null() {
+        assert!(SqlMoney::NULL.to_sql_double().is_null());
     }
 }

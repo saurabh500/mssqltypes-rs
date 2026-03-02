@@ -3,6 +3,7 @@
 use crate::error::SqlTypeError;
 use crate::sql_binary::SqlBinary;
 use crate::sql_boolean::SqlBoolean;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -313,7 +314,16 @@ impl SqlGuid {
         Ok(SqlGuid::new(arr))
     }
 }
-
+impl SqlGuid {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
+        }
+    }
+}
 // ── Tests ───────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -932,5 +942,30 @@ mod tests {
     #[test]
     fn ord_null_equals_null() {
         assert_eq!(SqlGuid::NULL.cmp(&SqlGuid::NULL), Ordering::Equal);
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_value() {
+        let g = SqlGuid::new(SAMPLE_BYTES);
+        let s = g.to_sql_string();
+        assert!(!s.is_null());
+        let text = s.value().unwrap();
+        assert!(text.contains('-'));
+        assert_eq!(text.len(), 36); // UUID format: 8-4-4-4-12
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlGuid::NULL.to_sql_string();
+        assert!(s.is_null());
+    }
+
+    #[test]
+    fn to_sql_string_zero_guid() {
+        let g = SqlGuid::new([0u8; 16]);
+        let s = g.to_sql_string();
+        assert_eq!(s.value().unwrap(), "00000000-0000-0000-0000-000000000000");
     }
 }

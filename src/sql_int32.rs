@@ -11,6 +11,7 @@ use crate::error::SqlTypeError;
 use crate::sql_boolean::SqlBoolean;
 use crate::sql_byte::SqlByte;
 use crate::sql_int16::SqlInt16;
+use crate::sql_string::SqlString;
 use std::cmp::Ordering;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -408,7 +409,42 @@ impl From<SqlBoolean> for SqlInt32 {
     }
 }
 
+impl From<SqlByte> for SqlInt32 {
+    fn from(b: SqlByte) -> Self {
+        if b.is_null() {
+            SqlInt32::NULL
+        } else {
+            match b.value() {
+                Ok(v) => SqlInt32::new(i32::from(v)),
+                Err(_) => SqlInt32::NULL,
+            }
+        }
+    }
+}
+
+impl From<SqlInt16> for SqlInt32 {
+    fn from(s: SqlInt16) -> Self {
+        if s.is_null() {
+            SqlInt32::NULL
+        } else {
+            match s.value() {
+                Ok(v) => SqlInt32::new(i32::from(v)),
+                Err(_) => SqlInt32::NULL,
+            }
+        }
+    }
+}
+
 impl SqlInt32 {
+    /// Converts to `SqlBoolean`: NULL→NULL, zero→FALSE, non-zero→TRUE.
+    pub fn to_sql_boolean(&self) -> SqlBoolean {
+        match self.value {
+            None => SqlBoolean::NULL,
+            Some(0) => SqlBoolean::FALSE,
+            Some(_) => SqlBoolean::TRUE,
+        }
+    }
+
     /// Converts to `SqlInt16`: NULL→NULL, otherwise checks range −32,768..=32,767.
     /// Returns `Err(Overflow)` if value is outside i16 range.
     pub fn to_sql_int16(&self) -> Result<SqlInt16, SqlTypeError> {
@@ -436,6 +472,17 @@ impl SqlInt32 {
                     Ok(SqlByte::new(v as u8))
                 }
             }
+        }
+    }
+}
+
+impl SqlInt32 {
+    /// Converts to `SqlString` via Display formatting. NULL → NULL.
+    pub fn to_sql_string(&self) -> SqlString {
+        if self.is_null() {
+            SqlString::NULL
+        } else {
+            SqlString::new(&format!("{self}"))
         }
     }
 }
@@ -1126,5 +1173,136 @@ mod tests {
     #[test]
     fn ord_null_null_equal() {
         assert_eq!(SqlInt32::NULL.cmp(&SqlInt32::NULL), Ordering::Equal);
+    }
+
+    // ── From<SqlByte> for SqlInt32 tests ─────────────────────────────────────
+
+    #[test]
+    fn from_sql_byte_normal() {
+        let b = SqlByte::new(100);
+        let i: SqlInt32 = SqlInt32::from(b);
+        assert_eq!(i.value().unwrap(), 100);
+    }
+
+    #[test]
+    fn from_sql_byte_zero() {
+        let b = SqlByte::new(0);
+        let i: SqlInt32 = SqlInt32::from(b);
+        assert_eq!(i.value().unwrap(), 0);
+    }
+
+    #[test]
+    fn from_sql_byte_max() {
+        let b = SqlByte::new(u8::MAX);
+        let i: SqlInt32 = SqlInt32::from(b);
+        assert_eq!(i.value().unwrap(), 255);
+    }
+
+    #[test]
+    fn from_sql_byte_null() {
+        let b = SqlByte::NULL;
+        let i: SqlInt32 = SqlInt32::from(b);
+        assert!(i.is_null());
+    }
+
+    // ── From<SqlInt16> for SqlInt32 tests ────────────────────────────────────
+
+    #[test]
+    fn from_sql_int16_normal() {
+        let s = SqlInt16::new(1000);
+        let i: SqlInt32 = SqlInt32::from(s);
+        assert_eq!(i.value().unwrap(), 1000);
+    }
+
+    #[test]
+    fn from_sql_int16_zero() {
+        let s = SqlInt16::new(0);
+        let i: SqlInt32 = SqlInt32::from(s);
+        assert_eq!(i.value().unwrap(), 0);
+    }
+
+    #[test]
+    fn from_sql_int16_max() {
+        let s = SqlInt16::new(i16::MAX);
+        let i: SqlInt32 = SqlInt32::from(s);
+        assert_eq!(i.value().unwrap(), i16::MAX as i32);
+    }
+
+    #[test]
+    fn from_sql_int16_min() {
+        let s = SqlInt16::new(i16::MIN);
+        let i: SqlInt32 = SqlInt32::from(s);
+        assert_eq!(i.value().unwrap(), i16::MIN as i32);
+    }
+
+    #[test]
+    fn from_sql_int16_null() {
+        let s = SqlInt16::NULL;
+        let i: SqlInt32 = SqlInt32::from(s);
+        assert!(i.is_null());
+    }
+
+    // ── to_sql_boolean() tests ──────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_boolean_zero_is_false() {
+        let v = SqlInt32::new(0);
+        let b = v.to_sql_boolean();
+        assert!(!b.is_null());
+        assert_eq!(b.value().unwrap(), false);
+    }
+
+    #[test]
+    fn to_sql_boolean_positive_is_true() {
+        let v = SqlInt32::new(42);
+        let b = v.to_sql_boolean();
+        assert_eq!(b.value().unwrap(), true);
+    }
+
+    #[test]
+    fn to_sql_boolean_negative_is_true() {
+        let v = SqlInt32::new(-1);
+        let b = v.to_sql_boolean();
+        assert_eq!(b.value().unwrap(), true);
+    }
+
+    #[test]
+    fn to_sql_boolean_max_is_true() {
+        let v = SqlInt32::new(i32::MAX);
+        let b = v.to_sql_boolean();
+        assert_eq!(b.value().unwrap(), true);
+    }
+
+    #[test]
+    fn to_sql_boolean_null_is_null() {
+        let v = SqlInt32::NULL;
+        let b = v.to_sql_boolean();
+        assert!(b.is_null());
+    }
+
+    // ── to_sql_string() tests ────────────────────────────────────────────────
+
+    #[test]
+    fn to_sql_string_positive() {
+        let s = SqlInt32::new(123456).to_sql_string();
+        assert_eq!(s.value().unwrap(), "123456");
+    }
+
+    #[test]
+    fn to_sql_string_negative() {
+        let s = SqlInt32::new(-789).to_sql_string();
+        assert_eq!(s.value().unwrap(), "-789");
+    }
+
+    #[test]
+    fn to_sql_string_zero() {
+        let s = SqlInt32::new(0).to_sql_string();
+        assert_eq!(s.value().unwrap(), "0");
+    }
+
+    #[test]
+    fn to_sql_string_null() {
+        let s = SqlInt32::NULL.to_sql_string();
+        assert!(s.is_null());
     }
 }
