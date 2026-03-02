@@ -1,4 +1,5 @@
 pub mod error;
+pub mod sql_binary;
 pub mod sql_boolean;
 pub mod sql_byte;
 pub mod sql_datetime;
@@ -10,6 +11,7 @@ pub mod sql_int64;
 pub mod sql_money;
 
 pub use error::SqlTypeError;
+pub use sql_binary::SqlBinary;
 pub use sql_boolean::SqlBoolean;
 pub use sql_byte::SqlByte;
 pub use sql_datetime::SqlDateTime;
