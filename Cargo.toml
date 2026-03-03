@@ -1,6 +1,6 @@
 [package]
 name = "mssqltypes"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Faithful Rust equivalents of C# System.Data.SqlTypes with SQL NULL semantics, checked arithmetic, and three-valued logic"
